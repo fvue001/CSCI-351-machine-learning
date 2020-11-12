@@ -174,7 +174,7 @@ main(int argc, char * argv[])
   assert(distance);
 
   /* Compute distances. */
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < ln; i++) {
     distance[i].viewer_id = i;
     for (size_t j = 0; j < m - 1; j++) {
       distance[i].distance += fabs(urating[j] - rating[i * m + j]);
@@ -183,15 +183,14 @@ main(int argc, char * argv[])
   if (rank == 0) {
   	for(size_t i = 1; i < n; i++) {
    printf("[%d->%d] (%zu) %zu\n", rank, r, 1, n);
-   ret = MPI_Send(0, 1, MPI_SIZE_T, r, 0, MPI_COMM_WORLD);
+   ret = MPI_recv(distance, 1, MPI_SIZE_T, r, 0, MPI_COMM_WORLD);
    }
-   
-   printf(">>> [%d->%d] (%zu)\n", rank, r, nrows);
-   ret = MPI_Send(0, nrows * m, MPI_DOUBLE, r, 0, MPI_COMM_WORLD); 
    assert(MPI_SUCCESS == ret);  
   }
  if(rank != 0){
-  print("error")
+  ret = MPI_Send(&(rating[r * base * m]), nrows * m, MPI_DOUBLE, r, 0, MPI_COMM_WORLD);
+  printf("Sending rating: %1f to thread %d\n", rating[r * base * n], r);      
+  assert(MPI_SUCCESS == ret);
  }
  
   /* Sort distances. */
